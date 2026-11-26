@@ -26,7 +26,9 @@ public final class ModelFailure {
         /** The provider's answer was unusable (malformed, empty, reasoning only). */
         INVALID_RESPONSE,
         /** The port is shutting down or was closed. */
-        PORT_CLOSED
+        PORT_CLOSED,
+        /** The host's transfer policy did not allow the prompt to reach the slot's endpoint. */
+        TRANSFER_DENIED
     }
 
     private final Kind kind;
