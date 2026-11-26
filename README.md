@@ -10,7 +10,7 @@ The sources come from [Ask AI](https://github.com/aresstack/askai) main at [d89d
 | --- | --- |
 | knowledge-model | `ModelPort` with slots, messages, tools, thinking mode, output format, reservations and resources; `EmbeddingPort` with its three roles; the chat core (`MainModelChat`, `PortMainModelChat`, `BlockingModelCall`, metrics) and the neutral role core (`ModelRole`, `RoleOutput`, `RoleToolCatalog`). Test fixtures: `FakeModelPort`. |
 | knowledge-file-support (optional) | Crash-safe UTF-8 writes (`AtomicFiles`) and `CorruptFileException`, shared by the file stores of Research4j and Writing4j. |
-| knowledge-api (in progress) | Source references, provenance, source and passage access, cancellation and progress, and the mandatory `TransferPolicy`. |
+| knowledge-api | Source references (`SourceRef`, extensible `SourceKind`, exact `SourceLocation`), `Provenance` and `Classification`; `SourceSearchPort`, `ContentFetchPort`, `PassageSearchPort`, `PassageLookup`, `PassageView`; `SentenceSegmentationPort`; cancellation and progress; the mandatory `TransferPolicy` with the run guard (high-water mark) and guarded ports. Read views for writing live in Writing4j. |
 | knowledge-model-support (optional, in progress) | A contract-true capacity planner for hosts without their own model management. |
 
 Package names start with `com.aresstack.knowledge4j`. Java 21.
