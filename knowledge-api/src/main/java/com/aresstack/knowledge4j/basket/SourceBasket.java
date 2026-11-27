@@ -13,7 +13,9 @@ import java.util.List;
  * host's stock, never copies; a {@link BasketReader} gives their passages. How the sources were found (a search plan,
  * the user's favourites, a folder) is not part of it. It carries the {@link Fence} it was collected for, mission and
  * Weidezaun with inclusions and exclusions, so the writing gets the same measure as the research and no second copy
- * of it travels beside the basket. Immutable; a source is in it once, whatever its location.
+ * of it travels beside the basket. It may carry the reader's {@link OrderingHint}s (term belongs under term), a
+ * non-binding hint for the writing, never a structure it must follow. Immutable; a source is in it once, whatever its
+ * location.
  */
 public final class SourceBasket {
 
@@ -21,6 +23,7 @@ public final class SourceBasket {
 
     private final Fence fence;
     private final List<SourceRef> sources;
+    private final List<OrderingHint> hints;
 
     /** A basket without a fence yet (an empty mission); {@link #withFence} gives it one. */
     public SourceBasket(List<SourceRef> sources) {
@@ -29,6 +32,20 @@ public final class SourceBasket {
 
     /** A basket collected for {@code fence}; {@code null} means no fence yet. */
     public SourceBasket(Fence fence, List<SourceRef> sources) {
+        this(fence, sources, null);
+    }
+
+    /** As above, with the reader's ordering hints; {@code null} means none. A hint is in it once. */
+    public SourceBasket(Fence fence, List<SourceRef> sources, List<OrderingHint> hints) {
+        List<OrderingHint> distinct = new ArrayList<>();
+        if (hints != null) {
+            for (OrderingHint hint : hints) {
+                if (hint != null && !distinct.contains(hint)) {
+                    distinct.add(hint);
+                }
+            }
+        }
+        this.hints = Collections.unmodifiableList(distinct);
         this.fence = fence == null ? Fence.of("") : fence;
         List<SourceRef> once = new ArrayList<>();
         if (sources != null) {
@@ -52,7 +69,17 @@ public final class SourceBasket {
 
     /** This basket with {@code fence} instead of its own, as the reader widens or narrows the Weidezaun. */
     public SourceBasket withFence(Fence fence) {
-        return new SourceBasket(fence, sources);
+        return new SourceBasket(fence, sources, hints);
+    }
+
+    /** The reader's ordering hints in the order they were given; empty when the reader sorted nothing. */
+    public List<OrderingHint> hints() {
+        return hints;
+    }
+
+    /** This basket with {@code hints} instead of its own, as the reader sorts found terms after a search. */
+    public SourceBasket withHints(List<OrderingHint> hints) {
+        return new SourceBasket(fence, sources, hints);
     }
 
     /** The sources in the order they were added. */
@@ -66,19 +93,19 @@ public final class SourceBasket {
 
     /**
      * This basket with more sources, as a further search adds them; sources already in it stay as they are, and so
-     * does the fence.
+     * do the fence and the hints.
      */
     public SourceBasket with(List<SourceRef> more) {
         List<SourceRef> all = new ArrayList<>(sources);
         if (more != null) {
             all.addAll(more);
         }
-        return new SourceBasket(fence, all);
+        return new SourceBasket(fence, all, hints);
     }
 
     /** Sizes and the fingerprint of the fence only. */
     @Override
     public String toString() {
-        return "SourceBasket[" + sources.size() + " sources, fence " + fence.basis() + "]";
+        return "SourceBasket[" + sources.size() + " sources, fence " + fence.basis() + ", " + hints.size() + " hints]";
     }
 }

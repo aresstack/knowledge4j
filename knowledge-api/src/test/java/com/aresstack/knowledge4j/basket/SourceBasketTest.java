@@ -28,7 +28,7 @@ class SourceBasketTest {
         SourceBasket basket = new SourceBasket(List.of(A)).with(List.of(B, A.withRevision("5")));
         assertEquals(List.of(A, B), basket.sources());
         assertTrue(SourceBasket.empty().isEmpty());
-        assertEquals("SourceBasket[2 sources, fence " + Fence.of("").basis() + "]", basket.toString());
+        assertEquals("SourceBasket[2 sources, fence " + Fence.of("").basis() + ", 0 hints]", basket.toString());
     }
 
     @Test
@@ -44,5 +44,18 @@ class SourceBasketTest {
         assertEquals(List.of("Hausdach", "Gründach"), answered.fence().getExcluded());
         assertEquals(List.of(A, B), answered.sources());
         assertEquals("", new SourceBasket(List.of(A)).fence().getMission());
+    }
+
+    @Test
+    void theReadersOrderingHintsTravelInTheBasketAsTheyAreGiven() {
+        OrderingHint tank = new OrderingHint("Zisterne", "Regenwasser speichern");
+        OrderingHint barrel = new OrderingHint(" Regentonne ", "Regenwasser speichern");
+        SourceBasket basket = new SourceBasket(List.of(A)).withHints(List.of(tank, barrel, tank));
+        assertEquals(List.of(tank, barrel), basket.hints());
+        assertEquals("Regentonne", basket.hints().get(1).term());
+        assertEquals(basket.hints(), basket.with(List.of(B)).withFence(Fence.of("Regenwasser")).hints());
+        assertTrue(new SourceBasket(List.of(A)).hints().isEmpty());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new OrderingHint("Zisterne", "zisterne"));
     }
 }
