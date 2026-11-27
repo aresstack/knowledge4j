@@ -1,5 +1,6 @@
 package com.aresstack.knowledge4j.basket;
 
+import com.aresstack.knowledge4j.scope.Fence;
 import com.aresstack.knowledge4j.source.SourceKind;
 import com.aresstack.knowledge4j.source.SourceLocation;
 import com.aresstack.knowledge4j.source.SourceRef;
@@ -27,6 +28,21 @@ class SourceBasketTest {
         SourceBasket basket = new SourceBasket(List.of(A)).with(List.of(B, A.withRevision("5")));
         assertEquals(List.of(A, B), basket.sources());
         assertTrue(SourceBasket.empty().isEmpty());
-        assertEquals("SourceBasket[2 sources]", basket.toString());
+        assertEquals("SourceBasket[2 sources, fence " + Fence.of("").basis() + "]", basket.toString());
+    }
+
+    @Test
+    void theBasketCarriesItsFenceThroughFurtherSearchesAndTheReaderCanWidenIt() {
+        Fence fence = new Fence("Regenwasser im Kleingarten", "", List.of("Zisternen"), List.of("Hausdach"), "", "");
+        SourceBasket basket = new SourceBasket(fence, List.of(A)).with(List.of(B));
+        assertEquals(fence.basis(), basket.fence().basis());
+        assertEquals(List.of(A, B), basket.sources());
+
+        SourceBasket answered = basket.withFence(basket.fence().widened(List.of("Bewässerung", "Zisternen"),
+                List.of("Gründach")));
+        assertEquals(List.of("Zisternen", "Bewässerung"), answered.fence().getIncluded());
+        assertEquals(List.of("Hausdach", "Gründach"), answered.fence().getExcluded());
+        assertEquals(List.of(A, B), answered.sources());
+        assertEquals("", new SourceBasket(List.of(A)).fence().getMission());
     }
 }

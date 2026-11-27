@@ -62,6 +62,27 @@ public final class Fence {
         return time;
     }
 
+    /**
+     * This fence with more of what belongs to it and more of what is excluded, as the reader answers the program's
+     * yes/no questions on neighbouring fields after the search; lines already in a list stay once.
+     */
+    public Fence widened(List<String> moreIncluded, List<String> moreExcluded) {
+        return new Fence(mission, edge, joined(included, moreIncluded), joined(excluded, moreExcluded), place, time);
+    }
+
+    private static List<String> joined(List<String> lines, List<String> more) {
+        List<String> all = new ArrayList<String>(lines);
+        if (more != null) {
+            for (String line : more) {
+                String v = clean(line);
+                if (!v.isEmpty() && !all.contains(v)) {
+                    all.add(v);
+                }
+            }
+        }
+        return all;
+    }
+
     /** Whether the fence says more than the mission: an edge, inclusions, exclusions, place or time. */
     public boolean hasBounds() {
         return !edge.isEmpty() || !included.isEmpty() || !excluded.isEmpty() || !place.isEmpty() || !time.isEmpty();
